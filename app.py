@@ -15,9 +15,27 @@ Main responsibilities:
 - Trigger backend logic in `chatbot.py` to generate answers.
 """
 
+import os
+
 import streamlit as st
 
 from chatbot import Chatbot
+
+
+def set_api_keys() -> None:
+    """
+    Set the OpenAI and Tavily API keys as environment variables.
+
+    This function retrieves the API keys from Streamlit secrets and sets them in the
+    environment for use by the Chatbot class.
+    """
+    openai_key = st.secrets.get("OPENAI_API_KEY")
+    tavily_key = st.secrets.get("TAVILY_API_KEY")
+
+    if openai_key:
+        os.environ["OPENAI_API_KEY"] = openai_key
+    if tavily_key:
+        os.environ["TAVILY_API_KEY"] = tavily_key
 
 
 def initialize_session_state() -> None:
@@ -126,6 +144,7 @@ def main() -> None:
     """
     st.set_page_config(page_title="LangChain QA Chatbot", page_icon="🤖")
     st.title("LangChain QA Chatbot")
+    set_api_keys()
     enable_search = st.checkbox("Enable Web Search")
     chatbot = Chatbot()
     initialize_session_state()
