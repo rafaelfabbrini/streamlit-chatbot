@@ -22,20 +22,27 @@ import streamlit as st
 from chatbot import Chatbot
 
 
-def set_api_keys() -> None:
+def sync_secrets_to_env() -> None:
     """
-    Set the OpenAI and Tavily API keys as environment variables.
+    Load API keys from Streamlit secrets (if defined) and export them to
+    environment variables.
 
-    This function retrieves the API keys from Streamlit secrets and sets them in the
-    environment for use by the Chatbot class.
+    This function allows seamless operation in both local and deployed
+    environments:
+    - In production (Streamlit Cloud), secrets will be set via `secrets.toml`.
+    - In local development, if the file is missing, it fails gracefully.
+
+    It sets OPENAI_API_KEY and TAVILY_API_KEY into os.environ, enabling usage by
+    LangChain and Tavily that rely on environment-based configuration.
     """
-    openai_key = st.secrets.get("OPENAI_API_KEY")
-    tavily_key = st.secrets.get("TAVILY_API_KEY")
+    if st.secrets.load_if_toml_exists():
+        openai_key = st.secrets.get("OPENAI_API_KEY")
+        tavily_key = st.secrets.get("TAVILY_API_KEY")
 
-    if openai_key:
-        os.environ["OPENAI_API_KEY"] = openai_key
-    if tavily_key:
-        os.environ["TAVILY_API_KEY"] = tavily_key
+        if openai_key:
+            os.environ["OPENAI_API_KEY"] = openai_key
+        if tavily_key:
+            os.environ["TAVILY_API_KEY"] = tavily_key
 
 
 def initialize_session_state() -> None:
@@ -144,7 +151,7 @@ def main() -> None:
     """
     st.set_page_config(page_title="LangChain QA Chatbot", page_icon="🤖")
     st.title("LangChain QA Chatbot")
-    set_api_keys()
+    sync_secrets_to_env()
     enable_search = st.checkbox("Enable Web Search")
     chatbot = Chatbot()
     initialize_session_state()
