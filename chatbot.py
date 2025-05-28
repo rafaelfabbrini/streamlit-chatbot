@@ -134,7 +134,7 @@ class Chatbot:
             - ToolException: If the Tavily tool encounters a network error, downtime, or
               invalid API key.
         """
-        return TavilySearchResults().run(prompt)
+        return self.search_tool.run(prompt)
 
     @backoff.on_exception(
         backoff.expo,
